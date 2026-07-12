@@ -8,7 +8,7 @@ from flask import Flask, jsonify, render_template, request
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 DATA_FILE = Path(__file__).with_name("data.json")
-CODE_GERANT = "CATEX-GERANT-2026"
+CODE_GERANT = "carlos1269"
 
 
 def default_availability():
