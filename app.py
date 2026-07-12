@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
@@ -222,4 +223,6 @@ def api_reset_password():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    debug_mode = os.getenv("FLASK_DEBUG", "0") == "1"
+    port = int(os.getenv("PORT", "5000"))
+    app.run(host="0.0.0.0", port=port, debug=debug_mode, use_reloader=False)
