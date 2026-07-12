@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catex</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --bg:#F6F6F4;
+    --surface:#FFFFFF;
+    --border:#E2E1DC;
+    --text:#20242A;
+    --text-muted:#6B7076;
+    --accent:#2F5D62;
+    --accent-hover:#234648;
+    --accent-soft:#E7EFEE;
+    --danger:#B24A34;
+    --danger-soft:#F6E9E4;
+    --success:#3F7D53;
+    --success-soft:#E9F3EC;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  #root{min-height:100vh;display:flex;flex-direction:column;}
+
+  /* Top bar */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 28px;background:var(--surface);border-bottom:1px solid var(--border);
+    position:sticky;top:0;z-index:10;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;letter-spacing:-0.02em;}
+  .brand .mark{
+    width:30px;height:30px;border-radius:8px;background:var(--accent);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;
+  }
+  .topbar nav{display:flex;gap:4px;}
+  .topbar .navlink{
+    padding:8px 14px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-muted);
+    cursor:pointer;border:none;background:none;
+  }
+  .topbar .navlink.active{background:var(--accent-soft);color:var(--accent);}
+  .topbar .navlink:hover:not(.active){background:var(--bg);}
+  .userbox{display:flex;align-items:center;gap:12px;}
+  .userbox .name{font-size:13px;color:var(--text-muted);}
+  .btn{
+    padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);
+    cursor:pointer;font-size:14px;font-weight:500;color:var(--text);font-family:inherit;
+  }
+  .btn:hover{background:var(--bg);}
+  .btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .btn-primary:hover{background:var(--accent-hover);}
+  .btn-danger{color:var(--danger);border-color:var(--danger-soft);background:var(--danger-soft);}
+  .btn-danger:hover{background:#efd9d0;}
+  .btn-sm{padding:6px 12px;font-size:13px;}
+  .btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+  main{flex:1;padding:32px 28px;max-width:1080px;margin:0 auto;width:100%;}
+
+  /* Auth */
+  .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .auth-card{
+    width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);
+    border-radius:16px;padding:36px;
+  }
+  .auth-card .brand{justify-content:center;margin-bottom:6px;font-size:22px;}
+  .auth-sub{text-align:center;color:var(--text-muted);font-size:14px;margin-bottom:26px;}
+  .tabs{display:flex;border:1px solid var(--border);border-radius:9px;padding:3px;margin-bottom:22px;}
+  .tab{flex:1;text-align:center;padding:8px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-muted);}
+  .tab.active{background:var(--accent);color:#fff;}
+
+  label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text);}
+  input,select,textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;
+    font-size:14px;font-family:inherit;background:var(--surface);color:var(--text);margin-bottom:14px;
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .field-note{font-size:12px;color:var(--text-muted);margin-top:-10px;margin-bottom:14px;}
+  .link-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;padding:0;font-family:inherit;text-decoration:underline;}
+  .msg{padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;}
+  .msg-error{background:var(--danger-soft);color:var(--danger);}
+  .msg-success{background:var(--success-soft);color:var(--success);}
+  .msg-info{background:var(--accent-soft);color:var(--accent);}
+
+  /* Cards / sections */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px;}
+  h1{font-size:22px;margin:0 0 4px;letter-spacing:-0.02em;}
+  h2{font-size:16px;margin:0 0 16px;letter-spacing:-0.01em;}
+  .page-sub{color:var(--text-muted);font-size:14px;margin:0 0 24px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media (max-width:760px){ .grid-2{grid-template-columns:1fr;} .row2{grid-template-columns:1fr;} .topbar{flex-wrap:wrap;gap:10px;} }
+
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{text-align:left;color:var(--text-muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:0.04em;padding:8px 10px;border-bottom:1px solid var(--border);}
+  td{padding:10px;border-bottom:1px solid var(--border);}
+  tr:hover td{background:var(--bg);}
+  tr.clickable{cursor:pointer;}
+
+  .pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;}
+  .pill-confirme{background:var(--success-soft);color:var(--success);}
+  .pill-annule{background:var(--danger-soft);color:var(--danger);}
+
+  .slots-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .slot-btn{
+    padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);
+    font-family:'IBM Plex Mono',monospace;font-size:13px;cursor:pointer;font-weight:500;
+  }
+  .slot-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+  .day-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+  .day-row:last-child{border-bottom:none;}
+  .day-label{width:100px;font-weight:600;font-size:14px;}
+  .range-item{display:flex;align-items:center;gap:6px;background:var(--bg);padding:6px 8px;border-radius:8px;}
+  .range-item input{margin:0;width:90px;padding:6px 8px;}
+  .remove-x{cursor:pointer;color:var(--text-muted);font-weight:700;padding:0 4px;}
+  .remove-x:hover{color:var(--danger);}
+  .add-range{background:none;border:1px dashed var(--border);border-radius:8px;padding:6px 10px;font-size:13px;color:var(--accent);cursor:pointer;}
+
+  .agenda-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .appt-item{
+    display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--border);
+    border-radius:10px;margin-bottom:8px;cursor:pointer;
+  }
+  .appt-item:hover{border-color:var(--accent);}
+  .appt-time{font-family:'IBM Plex Mono',monospace;font-weight:600;width:110px;}
+  .appt-client{font-weight:500;flex:1;}
+
+  .modal-bg{position:fixed;inset:0;background:rgba(20,22,25,0.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .modal{background:var(--surface);border-radius:14px;padding:26px;max-width:460px;width:100%;max-height:85vh;overflow:auto;}
+  .modal h2{margin-bottom:18px;}
+  .info-line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;}
+  .info-line:last-child{border-bottom:none;}
+  .info-line span:first-child{color:var(--text-muted);}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+
+  .empty-state{text-align:center;padding:40px 20px;color:var(--text-muted);font-size:14px;}
+  .loading{text-align:center;padding:40px;color:var(--text-muted);font-size:14px;}
+  footer.disclaimer{text-align:center;padding:16px;font-size:12px;color:var(--text-muted);}
+</style>
+</head>
+<body>
+<div id="root"><div class="loading">Chargement de Catex…</div></div>
+
+<script>
+/* ============================================================
+   CATEX — application de prise de rendez-vous
+   Démo autonome : les données sont stockées via window.storage
+   (stockage partagé "shared"). Pour une mise en production réelle,
+   remplacer cette couche par un vrai backend sécurisé (hachage de
+   mot de passe robuste, envoi d'e-mails réel, contrôle d'accès serveur).
+   ============================================================ */
+
+const JOURS = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+const JOURS_LABEL = {lundi:'Lundi',mardi:'Mardi',mercredi:'Mercredi',jeudi:'Jeudi',vendredi:'Vendredi',samedi:'Samedi',dimanche:'Dimanche'};
+const CODE_GERANT = 'CATEX-GERANT-2026';
+
+let state = {
+  view: 'login',
+  currentUser: null,
+  error: '',
+  info: '',
+  loading: true,
+  subview: null,
+  registerRole: 'client',
+};
+
+function setState(patch){ state = {...state, ...patch}; render(); }
+
+/* ---------- Storage helpers ---------- */
+async function sGet(key){
+  try{ const r = await window.storage.get(key, true); return r ? JSON.parse(r.value) : null; }
+  catch(e){ return null; }
+}
+async function sSet(key, value){
+  try{ await window.storage.set(key, JSON.stringify(value), true); return true; }
+  catch(e){ console.error('storage set error', e); return false; }
+}
+async function sDelete(key){
+  try{ await window.storage.delete(key, true); }catch(e){}
+}
+
+function hashPw(pw){ try{ return btoa(unescape(encodeURIComponent('catex::'+pw))); }catch(e){ return pw; } }
+
+function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function weekdayKeyFromDate(iso){
+  const d = new Date(iso+'T00:00:00');
+  const idx = d.getDay(); // 0=dimanche..6=samedi
+  const map = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  return map[idx];
+}
+function fmtDateLong(iso){
+  const d = new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('fr-FR',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+}
+function addMinutes(hhmm, mins){
+  const [h,m] = hhmm.split(':').map(Number);
+  const total = h*60+m+mins;
+  const nh = Math.floor(total/60)%24, nm = total%60;
+  return String(nh).padStart(2,'0')+':'+String(nm).padStart(2,'0');
+}
+function timeToMin(hhmm){ const [h,m]=hhmm.split(':').map(Number); return h*60+m; }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+
+/* ---------- Data access ---------- */
+async function getUser(email){ return await sGet('user:'+email.toLowerCase().trim()); }
+async function saveUser(user){ await sSet('user:'+user.email.toLowerCase().trim(), user); }
+
+async function getClientIndex(){ return (await sGet('client_index')) || []; }
+async function addToClientIndex(email){
+  const idx = await getClientIndex();
+  if(!idx.includes(email.toLowerCase())){ idx.push(email.toLowerCase()); await sSet('client_index', idx); }
+}
+
+async function getAvailability(){
+  const av = await sGet('availability');
+  if(av) return av;
+  const empty = {dureeCreneau:30};
+  JOURS.forEach(j=>empty[j]=[]);
+  return empty;
+}
+async function saveAvailability(av){ await sSet('availability', av); }
+
+async function getAppointmentIndex(){ return (await sGet('appointment_index')) || []; }
+async function saveAppointment(appt){
+  await sSet('appt:'+appt.id, appt);
+  const idx = await getAppointmentIndex();
+  if(!idx.includes(appt.id)){ idx.push(appt.id); await sSet('appointment_index', idx); }
+}
+async function getAppointment(id){ return await sGet('appt:'+id); }
+async function getAllAppointments(){
+  const idx = await getAppointmentIndex();
+  const list = await Promise.all(idx.map(id=>getAppointment(id)));
+  return list.filter(Boolean);
+}
+
+/* ---------- Render root ---------- */
+function render(){
+  const root = document.getElementById('root');
+  if(state.loading){ root.innerHTML = '<div class="loading">Chargement de Catex…</div>'; return; }
+  if(!state.currentUser){ root.innerHTML = renderAuth(); attachAuthEvents(); return; }
+  if(state.currentUser.role === 'gerant'){ root.innerHTML = renderShell(renderManager()); }
+  else{ root.innerHTML = renderShell(renderClient()); }
+  attachShellEvents();
+  attachViewEvents();
+}
+
+/* ---------- Shell (topbar + main) ---------- */
+function renderShell(innerHtml){
+  const u = state.currentUser;
+  const isGerant = u.role === 'gerant';
+  const tabs = isGerant
+    ? [['manager-agenda','Agenda'],['manager-dispos','Disponibilités'],['manager-clients','Clients']]
+    : [['client-rdv','Prendre RDV'],['client-mes-rdv','Mes rendez-vous'],['client-profil','Mon profil']];
+  return `
+    <div class="topbar">
+      <div class="brand"><span class="mark">C</span> Catex</div>
+      <nav>
+        ${tabs.map(([v,label])=>`<button class="navlink ${state.view===v?'active':''}" data-nav="${v}">${label}</button>`).join('')}
+      </nav>
+      <div class="userbox">
+        <span class="name">${escapeHtml(u.prenom)} ${escapeHtml(u.nom)} ${isGerant?'· Gérant':''}</span>
+        <button class="btn btn-sm" id="btn-logout">Déconnexion</button>
+      </div>
+    </div>
+    <main>${innerHtml}</main>
+    <footer class="disclaimer">Catex — démo de prototype. Les mots de passe et données sont stockés à des fins de démonstration uniquement.</footer>
+  `;
+}
+
+function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ============================================================
+   AUTH VIEWS
+   ============================================================ */
+function renderAuth(){
+  const v = state.view;
+  let inner = '';
+  if(v === 'login') inner = authLoginForm();
+  else if(v === 'register') inner = authRegisterForm();
+  else if(v === 'forgot') inner = authForgotForm();
+  else inner = authLoginForm();
+
+  return `
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="brand"><span class="mark">C</span> Catex</div>
+        <p class="auth-sub">Votre espace personnel de rendez-vous</p>
+        ${(v==='login'||v==='register') ? `
+        <div class="tabs">
+          <div class="tab ${v==='login'?'active':''}" data-tab="login">Connexion</div>
+          <div class="tab ${v==='register'?'active':''}" data-tab="register">Créer un compte</div>
+        </div>` : ''}
+        ${state.error ? `<div class="msg msg-error">${escapeHtml(state.error)}</div>` : ''}
+        ${state.info ? `<div class="msg msg-info">${state.info}</div>` : ''}
+        ${inner}
+      </div>
+    </div>
+  `;
+}
+
+function authLoginForm(){
+  return `
+    <form id="form-login">
+      <label>Adresse e-mail</label>
+      <input type="email" id="login-email" required placeholder="vous@exemple.fr">
+      <label>Mot de passe</label>
+      <input type="password" id="login-pw" required placeholder="••••••••">
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:4px;">Se connecter</button>
+      <div style="text-align:center;margin-top:14px;">
+        <button type="button" class="link-btn" data-tab="forgot">Mot de passe oublié ?</button>
+      </div>
+    </form>
+  `;
+}
+
+function authRegisterForm(){
+  const role = state.registerRole;
+  return `
+    <form id="form-register">
+      <div class="tabs" style="margin-bottom:16px;">
+        <div class="tab ${role==='client'?'active':''}" data-role="client">Je suis client</div>
+        <div class="tab ${role==='gerant'?'active':''}" data-role="gerant">Je suis le gérant</div>
+      </div>
+      <div class="row2">
+        <div><label>Prénom</label><input type="text" id="reg-prenom" required></div>
+        <div><label>Nom</label><input type="text" id="reg-nom" required></div>
+      </div>
+      <label>Adresse e-mail</label>
+      <input type="email" id="reg-email" required placeholder="vous@exemple.fr">
+      <label>Numéro de téléphone</label>
+      <input type="tel" id="reg-tel" required placeholder="06 12 34 56 78">
+      <label>Adresse postale</label>
+      <input type="text" id="reg-adresse" required placeholder="12 rue des Lilas, 75000 Paris">
+      ${role==='gerant' ? `
+      <label>Code gérant</label>
+      <input type="text" id="reg-code" placeholder="Code fourni par Catex">
+      <div class="field-note">Ce code confirme que vous êtes bien le gérant de l'établissement.</div>
+      ` : ''}
+      <label>Mot de passe</label>
+      <input type="password" id="reg-pw" required minlength="6" placeholder="6 caractères minimum">
+      <label>Confirmer le mot de passe</label>
+      <input type="password" id="reg-pw2" required minlength="6">
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:4px;">Créer mon compte</button>
+    </form>
+  `;
+}
+
+function authForgotForm(){
+  if(state.subview === 'code-sent'){
+    return `
+      <form id="form-reset">
+        <div class="msg msg-info">Dans une vraie application, un e-mail contenant un code de réinitialisation serait envoyé à cette adresse. Pour cette démo, voici le code généré :
+          <div class="mono" style="font-size:20px;font-weight:700;margin-top:8px;letter-spacing:0.1em;">${state.resetCode}</div>
+        </div>
+        <input type="hidden" id="reset-email" value="${escapeHtml(state.resetEmail)}">
+        <label>Code reçu</label>
+        <input type="text" id="reset-code-input" required placeholder="123456">
+        <label>Nouveau mot de passe</label>
+        <input type="password" id="reset-pw" required minlength="6">
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:4px;">Réinitialiser le mot de passe</button>
+        <div style="text-align:center;margin-top:14px;">
+          <button type="button" class="link-btn" data-tab="login">Retour à la connexion</button>
+        </div>
+      </form>
+    `;
+  }
+  return `
+    <form id="form-forgot">
+      <p style="font-size:14px;color:var(--text-muted);margin-top:0;">Indiquez l'adresse e-mail associée à votre compte. Nous vous enverrons un code pour choisir un nouveau mot de passe.</p>
+      <label>Adresse e-mail</label>
+      <input type="email" id="forgot-email" required placeholder="vous@exemple.fr">
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:4px;">Envoyer le code</button>
+      <div style="text-align:center;margin-top:14px;">
+        <button type="button" class="link-btn" data-tab="login">Retour à la connexion</button>
+      </div>
+    </form>
+  `;
+}
+
+function attachAuthEvents(){
+  document.querySelectorAll('[data-tab]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const tab = el.getAttribute('data-tab');
+      setState({view:tab, error:'', info:'', subview:null});
+    });
+  });
+  document.querySelectorAll('[data-role]').forEach(el=>{
+    el.addEventListener('click', ()=> setState({registerRole: el.getAttribute('data-role')}) );
+  });
+
+  const loginForm = document.getElementById('form-login');
+  if(loginForm) loginForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const pw = document.getElementById('login-pw').value;
+    const user = await getUser(email);
+    if(!user || user.passwordHash !== hashPw(pw)){
+      setState({error:"Adresse e-mail ou mot de passe incorrect."});
+      return;
+    }
+    setState({currentUser:user, error:'', info:'', view: user.role==='gerant'?'manager-agenda':'client-rdv'});
+  });
+
+  const regForm = document.getElementById('form-register');
+  if(regForm) regForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const prenom = document.getElementById('reg-prenom').value.trim();
+    const nom = document.getElementById('reg-nom').value.trim();
+    const email = document.getElementById('reg-email').value.trim().toLowerCase();
+    const tel = document.getElementById('reg-tel').value.trim();
+    const adresse = document.getElementById('reg-adresse').value.trim();
+    const pw = document.getElementById('reg-pw').value;
+    const pw2 = document.getElementById('reg-pw2').value;
+    const role = state.registerRole;
+
+    if(pw !== pw2){ setState({error:"Les mots de passe ne correspondent pas."}); return; }
+    if(role==='gerant'){
+      const code = document.getElementById('reg-code').value.trim();
+      if(code !== CODE_GERANT){ setState({error:"Code gérant invalide."}); return; }
+    }
+    const existing = await getUser(email);
+    if(existing){ setState({error:"Un compte existe déjà avec cette adresse e-mail."}); return; }
+
+    const user = {id:uid(), prenom, nom, email, telephone:tel, adresse, role, passwordHash:hashPw(pw)};
+    await saveUser(user);
+    if(role==='client') await addToClientIndex(email);
+    setState({currentUser:user, error:'', info:'', view: role==='gerant'?'manager-agenda':'client-rdv'});
+  });
+
+  const forgotForm = document.getElementById('form-forgot');
+  if(forgotForm) forgotForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const email = document.getElementById('forgot-email').value.trim().toLowerCase();
+    const user = await getUser(email);
+    if(!user){ setState({error:"Aucun compte associé à cette adresse e-mail."}); return; }
+    const code = String(Math.floor(100000+Math.random()*900000));
+    await sSet('resetcode:'+email, {code, expires: Date.now()+15*60*1000});
+    setState({error:'', resetEmail:email, resetCode:code, subview:'code-sent'});
+  });
+
+  const resetForm = document.getElementById('form-reset');
+  if(resetForm) resetForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const email = document.getElementById('reset-email').value;
+    const codeInput = document.getElementById('reset-code-input').value.trim();
+    const newPw = document.getElementById('reset-pw').value;
+    const stored = await sGet('resetcode:'+email);
+    if(!stored || stored.code !== codeInput || Date.now() > stored.expires){
+      setState({error:"Code invalide ou expiré."}); return;
+    }
+    const user = await getUser(email);
+    user.passwordHash = hashPw(newPw);
+    await saveUser(user);
+    await sDelete('resetcode:'+email);
+    setState({view:'login', subview:null, error:'', info:'Mot de passe mis à jour. Vous pouvez vous connecter.'});
+  });
+}
+
+/* ============================================================
+   CLIENT VIEWS
+   ============================================================ */
+function renderClient(){
+  if(state.view === 'client-profil') return renderClientProfil();
+  if(state.view === 'client-mes-rdv') return renderClientMesRdv();
+  return renderClientPriseRdv();
+}
+
+function renderClientProfil(){
+  const u = state.currentUser;
+  return `
+    <h1>Mon profil</h1>
+    <p class="page-sub">Vos informations personnelles.</p>
+    <div class="card" style="max-width:520px;">
+      <form id="form-profil">
+        <div class="row2">
+          <div><label>Prénom</label><input type="text" id="p-prenom" value="${escapeHtml(u.prenom)}" required></div>
+          <div><label>Nom</label><input type="text" id="p-nom" value="${escapeHtml(u.nom)}" required></div>
+        </div>
+        <label>Adresse e-mail</label>
+        <input type="email" id="p-email" value="${escapeHtml(u.email)}" disabled style="opacity:0.6;">
+        <label>Numéro de téléphone</label>
+        <input type="tel" id="p-tel" value="${escapeHtml(u.telephone)}" required>
+        <label>Adresse postale</label>
+        <input type="text" id="p-adresse" value="${escapeHtml(u.adresse)}" required>
+        ${state.info ? `<div class="msg msg-success">${state.info}</div>` : ''}
+        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+      </form>
+    </div>
+  `;
+}
+
+function renderClientPriseRdv(){
+  const dateVal = state.selectedDate || todayISO();
+  return `
+    <h1>Prendre rendez-vous</h1>
+    <p class="page-sub">Choisissez une date pour voir les créneaux disponibles.</p>
+    <div class="card">
+      <label>Date souhaitée</label>
+      <input type="date" id="rdv-date" value="${dateVal}" min="${todayISO()}" style="max-width:220px;">
+      <div id="slots-zone">
+        <div class="loading">Chargement des créneaux…</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderClientMesRdv(){
+  return `
+    <h1>Mes rendez-vous</h1>
+    <p class="page-sub">Historique et rendez-vous à venir.</p>
+    <div class="card" id="mes-rdv-zone"><div class="loading">Chargement…</div></div>
+  `;
+}
+
+async function loadSlotsZone(){
+  const zone = document.getElementById('slots-zone');
+  if(!zone) return;
+  const dateInput = document.getElementById('rdv-date');
+  const date = dateInput ? dateInput.value : (state.selectedDate || todayISO());
+  state.selectedDate = date;
+
+  const av = await getAvailability();
+  const wk = weekdayKeyFromDate(date);
+  const ranges = av[wk] || [];
+  const duree = av.dureeCreneau || 30;
+
+  if(ranges.length === 0){
+    zone.innerHTML = `<div class="empty-state">Le gérant n'a défini aucun créneau disponible pour ce jour (${JOURS_LABEL[wk]}).</div>`;
+    return;
+  }
+
+  const allAppts = await getAllAppointments();
+  const bookedOnDate = allAppts.filter(a => a.date === date && a.status === 'confirme').map(a=>a.start);
+
+  let slots = [];
+  ranges.forEach(r=>{
+    let cursor = r.debut;
+    while(timeToMin(cursor) + duree <= timeToMin(r.fin)){
+      slots.push(cursor);
+      cursor = addMinutes(cursor, duree);
+    }
+  });
+  slots = slots.filter(s => !bookedOnDate.includes(s));
+
+  if(slots.length === 0){
+    zone.innerHTML = `<div class="empty-state">Aucun créneau disponible ce jour-là. Essayez une autre date.</div>`;
+    return;
+  }
+
+  zone.innerHTML = `
+    <h2 style="margin-top:20px;">Créneaux disponibles — ${fmtDateLong(date)}</h2>
+    <div class="slots-grid">
+      ${slots.map(s=>`<button class="slot-btn" data-slot="${s}">${s}</button>`).join('')}
+    </div>
+  `;
+  zone.querySelectorAll('[data-slot]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const start = btn.getAttribute('data-slot');
+      const end = addMinutes(start, duree);
+      const u = state.currentUser;
+      await saveAppointment({id:uid(), clientEmail:u.email, clientNom:u.nom, clientPrenom:u.prenom, date, start, end, status:'confirme', createdAt: Date.now()});
+      setState({view:'client-mes-rdv', info:'Rendez-vous confirmé pour le '+fmtDateLong(date)+' à '+start+'.'});
+    });
+  });
+}
+
+async function loadMesRdvZone(){
+  const zone = document.getElementById('mes-rdv-zone');
+  if(!zone) return;
+  const u = state.currentUser;
+  const all = await getAllAppointments();
+  const mine = all.filter(a=>a.clientEmail===u.email).sort((a,b)=> (a.date+a.start).localeCompare(b.date+b.start));
+  if(mine.length===0){ zone.innerHTML = `<div class="empty-state">Vous n'avez aucun rendez-vous pour le moment.</div>`; return; }
+  zone.innerHTML = mine.map(a=>`
+    <div class="appt-item" style="cursor:default;">
+      <span class="appt-time mono">${fmtDateLong(a.date)} · ${a.start}</span>
+      <span class="appt-client">Rendez-vous</span>
+      <span class="pill pill-${a.status==='confirme'?'confirme':'annule'}">${a.status==='confirme'?'Confirmé':'Annulé'}</span>
+      ${a.status==='confirme' ? `<button class="btn btn-sm btn-danger" data-cancel="${a.id}">Annuler</button>` : ''}
+    </div>
+  `).join('');
+  zone.querySelectorAll('[data-cancel]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-cancel');
+      const appt = await getAppointment(id);
+      appt.status = 'annule';
+      await saveAppointment(appt);
+      loadMesRdvZone();
+    });
+  });
+}
+
+/* ============================================================
+   MANAGER VIEWS
+   ============================================================ */
+function renderManager(){
+  if(state.view === 'manager-dispos') return renderManagerDispos();
+  if(state.view === 'manager-clients') return renderManagerClients();
+  return renderManagerAgenda();
+}
+
+function renderManagerAgenda(){
+  const dateVal = state.agendaDate || todayISO();
+  return `
+    <h1>Agenda</h1>
+    <p class="page-sub">Rendez-vous pris par vos clients.</p>
+    <div class="card">
+      <div class="agenda-toolbar">
+        <label style="margin:0;">Date&nbsp;</label>
+        <input type="date" id="agenda-date" value="${dateVal}" style="max-width:220px;margin:0;">
+      </div>
+      <div id="agenda-zone"><div class="loading">Chargement…</div></div>
+    </div>
+  `;
+}
+
+async function loadAgendaZone(){
+  const zone = document.getElementById('agenda-zone');
+  if(!zone) return;
+  const input = document.getElementById('agenda-date');
+  const date = input ? input.value : (state.agendaDate || todayISO());
+  state.agendaDate = date;
+
+  const all = await getAllAppointments();
+  const dayAppts = all.filter(a=>a.date===date && a.status==='confirme').sort((a,b)=>a.start.localeCompare(b.start));
+
+  if(dayAppts.length===0){
+    zone.innerHTML = `<div class="empty-state">Aucun rendez-vous le ${fmtDateLong(date)}.</div>`;
+    return;
+  }
+  zone.innerHTML = `<h2 style="margin-top:18px;">${fmtDateLong(date)}</h2>` + dayAppts.map(a=>`
+    <div class="appt-item" data-appt="${a.id}">
+      <span class="appt-time mono">${a.start} – ${a.end}</span>
+      <span class="appt-client">${escapeHtml(a.clientPrenom)} ${escapeHtml(a.clientNom)}</span>
+      <span class="pill pill-confirme">Confirmé</span>
+    </div>
+  `).join('');
+  zone.querySelectorAll('[data-appt]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      const id = el.getAttribute('data-appt');
+      const appt = await getAppointment(id);
+      const client = await getUser(appt.clientEmail);
+      showClientModal(client, [appt]);
+    });
+  });
+}
+
+function renderManagerDispos(){
+  return `
+    <h1>Mes disponibilités</h1>
+    <p class="page-sub">Définissez vos horaires d'ouverture pour que les clients puissent réserver un créneau.</p>
+    <div class="card">
+      <label style="max-width:220px;">Durée d'un créneau (minutes)</label>
+      <select id="duree-creneau" style="max-width:220px;">
+        <option value="15">15 min</option>
+        <option value="30">30 min</option>
+        <option value="45">45 min</option>
+        <option value="60">60 min</option>
+      </select>
+      <div id="dispo-zone"><div class="loading">Chargement…</div></div>
+      <button class="btn btn-primary" id="save-dispo" style="margin-top:16px;">Enregistrer mes disponibilités</button>
+      <div id="dispo-msg"></div>
+    </div>
+  `;
+}
+
+let dispoState = null;
+
+async function loadDispoZone(){
+  const zone = document.getElementById('dispo-zone');
+  if(!zone) return;
+  if(!dispoState){ dispoState = await getAvailability(); }
+  document.getElementById('duree-creneau').value = String(dispoState.dureeCreneau || 30);
+  renderDispoRows();
+}
+
+function renderDispoRows(){
+  const zone = document.getElementById('dispo-zone');
+  zone.innerHTML = JOURS.map(j=>{
+    const ranges = dispoState[j] || [];
+    return `
+      <div class="day-row">
+        <div class="day-label">${JOURS_LABEL[j]}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;flex:1;">
+          ${ranges.map((r,i)=>`
+            <span class="range-item">
+              <input type="time" value="${r.debut}" data-day="${j}" data-idx="${i}" data-field="debut">
+              <span>–</span>
+              <input type="time" value="${r.fin}" data-day="${j}" data-idx="${i}" data-field="fin">
+              <span class="remove-x" data-remove-day="${j}" data-remove-idx="${i}">×</span>
+            </span>
+          `).join('')}
+          <button type="button" class="add-range" data-add-day="${j}">+ créneau</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  zone.querySelectorAll('input[data-day]').forEach(inp=>{
+    inp.addEventListener('change', ()=>{
+      const day = inp.getAttribute('data-day');
+      const idx = Number(inp.getAttribute('data-idx'));
+      const field = inp.getAttribute('data-field');
+      dispoState[day][idx][field] = inp.value;
+    });
+  });
+  zone.querySelectorAll('[data-remove-day]').forEach(x=>{
+    x.addEventListener('click', ()=>{
+      const day = x.getAttribute('data-remove-day');
+      const idx = Number(x.getAttribute('data-remove-idx'));
+      dispoState[day].splice(idx,1);
+      renderDispoRows();
+    });
+  });
+  zone.querySelectorAll('[data-add-day]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const day = btn.getAttribute('data-add-day');
+      if(!dispoState[day]) dispoState[day]=[];
+      dispoState[day].push({debut:'09:00', fin:'12:00'});
+      renderDispoRows();
+    });
+  });
+}
+
+function renderManagerClients(){
+  return `
+    <h1>Mes clients</h1>
+    <p class="page-sub">Liste de vos clients et de leurs informations personnelles.</p>
+    <div class="card"><div id="clients-zone"><div class="loading">Chargement…</div></div></div>
+  `;
+}
+
+async function loadClientsZone(){
+  const zone = document.getElementById('clients-zone');
+  if(!zone) return;
+  const emails = await getClientIndex();
+  const clients = (await Promise.all(emails.map(getUser))).filter(Boolean);
+  if(clients.length===0){ zone.innerHTML = `<div class="empty-state">Aucun client inscrit pour le moment.</div>`; return; }
+  zone.innerHTML = `
+    <table>
+      <thead><tr><th>Nom</th><th>E-mail</th><th>Téléphone</th><th>Adresse</th></tr></thead>
+      <tbody>
+        ${clients.map(c=>`
+          <tr class="clickable" data-client="${c.email}">
+            <td>${escapeHtml(c.prenom)} ${escapeHtml(c.nom)}</td>
+            <td>${escapeHtml(c.email)}</td>
+            <td>${escapeHtml(c.telephone)}</td>
+            <td>${escapeHtml(c.adresse)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+  zone.querySelectorAll('[data-client]').forEach(row=>{
+    row.addEventListener('click', async ()=>{
+      const email = row.getAttribute('data-client');
+      const client = await getUser(email);
+      const all = await getAllAppointments();
+      const appts = all.filter(a=>a.clientEmail===email).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+      showClientModal(client, appts);
+    });
+  });
+}
+
+function showClientModal(client, appts){
+  const modalHtml = `
+    <div class="modal-bg" id="client-modal-bg">
+      <div class="modal">
+        <h2>${escapeHtml(client.prenom)} ${escapeHtml(client.nom)}</h2>
+        <div class="info-line"><span>E-mail</span><span>${escapeHtml(client.email)}</span></div>
+        <div class="info-line"><span>Téléphone</span><span>${escapeHtml(client.telephone)}</span></div>
+        <div class="info-line"><span>Adresse</span><span>${escapeHtml(client.adresse)}</span></div>
+        <h2 style="margin-top:20px;">Rendez-vous</h2>
+        ${appts.length===0 ? '<p style="color:var(--text-muted);font-size:14px;">Aucun rendez-vous.</p>' :
+          appts.map(a=>`<div class="info-line"><span>${fmtDateLong(a.date)} · ${a.start}</span><span class="pill pill-${a.status==='confirme'?'confirme':'annule'}">${a.status==='confirme'?'Confirmé':'Annulé'}</span></div>`).join('')
+        }
+        <div class="modal-actions"><button class="btn" id="close-modal">Fermer</button></div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  document.getElementById('close-modal').addEventListener('click', ()=>{
+    document.getElementById('client-modal-bg').remove();
+  });
+  document.getElementById('client-modal-bg').addEventListener('click', (e)=>{
+    if(e.target.id === 'client-modal-bg') e.target.remove();
+  });
+}
+
+/* ============================================================
+   SHELL + VIEW EVENT WIRING
+   ============================================================ */
+function attachShellEvents(){
+  document.querySelectorAll('[data-nav]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      dispoState = null;
+      setState({view: el.getAttribute('data-nav'), error:'', info:''});
+    });
+  });
+  const logoutBtn = document.getElementById('btn-logout');
+  if(logoutBtn) logoutBtn.addEventListener('click', ()=>{
+    setState({currentUser:null, view:'login', error:'', info:'', subview:null});
+  });
+}
+
+function attachViewEvents(){
+  // Client
+  const profilForm = document.getElementById('form-profil');
+  if(profilForm) profilForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const u = {...state.currentUser};
+    u.prenom = document.getElementById('p-prenom').value.trim();
+    u.nom = document.getElementById('p-nom').value.trim();
+    u.telephone = document.getElementById('p-tel').value.trim();
+    u.adresse = document.getElementById('p-adresse').value.trim();
+    await saveUser(u);
+    setState({currentUser:u, info:'Profil mis à jour avec succès.'});
+  });
+
+  const rdvDate = document.getElementById('rdv-date');
+  if(rdvDate){ loadSlotsZone(); rdvDate.addEventListener('change', loadSlotsZone); }
+
+  if(document.getElementById('mes-rdv-zone')) loadMesRdvZone();
+
+  // Manager
+  const agendaDate = document.getElementById('agenda-date');
+  if(agendaDate){ loadAgendaZone(); agendaDate.addEventListener('change', loadAgendaZone); }
+
+  if(document.getElementById('dispo-zone')){
+    loadDispoZone();
+    document.getElementById('duree-creneau').addEventListener('change', (e)=>{
+      dispoState.dureeCreneau = Number(e.target.value);
+    });
+    document.getElementById('save-dispo').addEventListener('click', async ()=>{
+      await saveAvailability(dispoState);
+      document.getElementById('dispo-msg').innerHTML = '<div class="msg msg-success" style="margin-top:14px;">Disponibilités enregistrées.</div>';
+    });
+  }
+
+  if(document.getElementById('clients-zone')) loadClientsZone();
+}
+
+/* ---------- Init ---------- */
+(async function init(){
+  setState({loading:false});
+})();
+</script>
+</body>
+</html>
